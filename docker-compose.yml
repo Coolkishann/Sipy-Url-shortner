@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # ─── Data Layer ───
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: url_shortener
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d url_shortener"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─── Application Layer ───
+  api-1:
+    build: 
+      context: ./services/api-server
+    environment:
+      DATABASE_URL: postgres://user:password@postgres:5432/url_shortener
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 3000
+      NODE_ENV: production
+      BASE_URL: http://localhost
+      RATE_LIMIT: 100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api-2:
+    build: 
+      context: ./services/api-server
+    environment:
+      DATABASE_URL: postgres://user:password@postgres:5432/url_shortener
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 3000
+      NODE_ENV: production
+      BASE_URL: http://localhost
+      RATE_LIMIT: 100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Load Balancer Layer ───
+  load-balancer:
+    build:
+      context: ./services/load-balancer
+    environment:
+      API_SERVERS: "http://api-1:3000,http://api-2:3000"
+      PORT: 8080
+      ADMIN_PORT: 8081
+      LB_STRATEGY: least-connections
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - api-1
+      - api-2
+    restart: unless-stopped
+
+  # ─── Frontend Layer ───
+  frontend:
+    build:
+      context: ./services/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - load-balancer
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:

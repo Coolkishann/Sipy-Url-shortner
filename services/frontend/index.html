@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="High-performance URL shortening service with analytics dashboard" />
+  <title>Snip — URL Shortener</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/main.css" />
+</head>
+<body>
+  <!-- ─── Sidebar Navigation ─── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <span class="brand-name">Snip</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-view="dashboard" id="nav-dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-view="shorten" id="nav-shorten">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <span>Shorten URL</span>
+      </a>
+      <a href="#" class="nav-item" data-view="urls" id="nav-urls">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>All URLs</span>
+      </a>
+      <a href="#" class="nav-item" data-view="health" id="nav-health">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>System Health</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="system-status" id="system-status">
+        <span class="status-dot"></span>
+        <span class="status-text">Connecting...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── Main Content ─── -->
+  <main class="main-content" id="main-content">
+
+    <!-- ═══ Dashboard View ═══ -->
+    <section class="view active" id="view-dashboard">
+      <header class="view-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="view-subtitle">Real-time overview of your URL shortener</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" id="btn-refresh-stats" title="Refresh stats">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-value" id="stat-total-urls">—</span>
+            <span class="kpi-label">Total URLs</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-value" id="stat-active-urls">—</span>
+            <span class="kpi-label">Active URLs</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-value" id="stat-total-clicks">—</span>
+            <span class="kpi-label">Total Clicks</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--orange">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-value" id="stat-clicks-today">—</span>
+            <span class="kpi-label">Clicks Today</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent URLs -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Recent URLs</h2>
+          <button class="btn btn-sm btn-primary" onclick="switchView('shorten')">+ New URL</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="recent-urls-table">
+            <thead>
+              <tr>
+                <th>Short ID</th>
+                <th>Original URL</th>
+                <th>Clicks</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recent-urls-body">
+              <tr><td colspan="6" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Shorten View ═══ -->
+    <section class="view" id="view-shorten">
+      <header class="view-header">
+        <div>
+          <h1>Shorten URL</h1>
+          <p class="view-subtitle">Create a new short link in seconds</p>
+        </div>
+      </header>
+
+      <div class="shorten-container">
+        <div class="card shorten-card">
+          <form id="shorten-form" autocomplete="off">
+            <div class="form-group">
+              <label for="input-url">Destination URL</label>
+              <div class="input-row">
+                <div class="input-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <input type="url" id="input-url" placeholder="https://example.com/your-very-long-url" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="input-expiry">Expiration (optional)</label>
+              <select id="input-expiry">
+                <option value="">Never</option>
+                <option value="3600">1 Hour</option>
+                <option value="86400">24 Hours</option>
+                <option value="604800">7 Days</option>
+                <option value="2592000">30 Days</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-shorten">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Shorten URL
+            </button>
+          </form>
+        </div>
+
+        <!-- Result -->
+        <div class="card result-card hidden" id="result-card">
+          <div class="result-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>URL shortened successfully!</span>
+          </div>
+          <div class="result-url-box">
+            <input type="text" id="result-url" readonly />
+            <button class="btn btn-primary" id="btn-copy" title="Copy to clipboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <div class="result-meta" id="result-meta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ All URLs View ═══ -->
+    <section class="view" id="view-urls">
+      <header class="view-header">
+        <div>
+          <h1>All URLs</h1>
+          <p class="view-subtitle">Manage all your shortened links</p>
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table" id="all-urls-table">
+            <thead>
+              <tr>
+                <th>Short ID</th>
+                <th>Original URL</th>
+                <th>Clicks</th>
+                <th>Created</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="all-urls-body">
+              <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+
+    <!-- ═══ Health View ═══ -->
+    <section class="view" id="view-health">
+      <header class="view-header">
+        <div>
+          <h1>System Health</h1>
+          <p class="view-subtitle">Monitor infrastructure and service status</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" id="btn-refresh-health">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="health-grid" id="health-grid">
+        <!-- Health cards rendered by JS -->
+      </div>
+
+      <!-- Architecture Diagram -->
+      <div class="card arch-card">
+        <h2>System Architecture</h2>
+        <div class="architecture-diagram" id="arch-diagram">
+          <div class="arch-row">
+            <div class="arch-node arch-client">
+              <div class="arch-node-icon">🌐</div>
+              <div class="arch-node-label">Client</div>
+              <div class="arch-node-sub">Browser / cURL</div>
+            </div>
+          </div>
+          <div class="arch-connector">
+            <div class="arch-line"></div>
+            <div class="arch-arrow">▼</div>
+          </div>
+          <div class="arch-row">
+            <div class="arch-node arch-lb" id="arch-lb">
+              <div class="arch-node-icon">⚖️</div>
+              <div class="arch-node-label">Load Balancer</div>
+              <div class="arch-node-sub">:8080 • Least Connections</div>
+              <div class="arch-node-status"></div>
+            </div>
+          </div>
+          <div class="arch-connector arch-connector-split">
+            <div class="arch-split">
+              <div class="arch-branch-left"></div>
+              <div class="arch-branch-right"></div>
+            </div>
+          </div>
+          <div class="arch-row arch-row-multi">
+            <div class="arch-node arch-api" id="arch-api1">
+              <div class="arch-node-icon">⚡</div>
+              <div class="arch-node-label">API Server 1</div>
+              <div class="arch-node-sub">Fastify • :3000</div>
+              <div class="arch-node-status"></div>
+            </div>
+            <div class="arch-node arch-api" id="arch-api2">
+              <div class="arch-node-icon">⚡</div>
+              <div class="arch-node-label">API Server 2</div>
+              <div class="arch-node-sub">Fastify • :3000</div>
+              <div class="arch-node-status"></div>
+            </div>
+          </div>
+          <div class="arch-connector arch-connector-split">
+            <div class="arch-split">
+              <div class="arch-branch-left"></div>
+              <div class="arch-branch-right"></div>
+            </div>
+          </div>
+          <div class="arch-row arch-row-multi">
+            <div class="arch-node arch-redis" id="arch-redis">
+              <div class="arch-node-icon">🔴</div>
+              <div class="arch-node-label">Redis Cache</div>
+              <div class="arch-node-sub">In-Memory • :6379</div>
+              <div class="arch-node-status"></div>
+            </div>
+            <div class="arch-node arch-pg" id="arch-pg">
+              <div class="arch-node-icon">🐘</div>
+              <div class="arch-node-label">PostgreSQL</div>
+              <div class="arch-node-sub">Persistent • :5432</div>
+              <div class="arch-node-status"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Analytics Modal ═══ -->
+    <div class="modal-overlay hidden" id="analytics-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>URL Analytics</h2>
+          <button class="btn btn-ghost modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body" id="analytics-body">
+          Loading...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/scripts/api.js" type="module"></script>
+  <script src="/scripts/app.js" type="module"></script>
+</body>
+</html>
