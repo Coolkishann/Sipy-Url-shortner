@@ -11,8 +11,6 @@ interface ServerTarget {
 // ─── Configuration ───
 const HEALTH_CHECK_INTERVAL = 5000; // 5s
 const HEALTH_CHECK_PATH = '/health';
-const proxy = httpProxy.createProxyServer({});
-
 // Parse servers from environment
 const serverUrls = (process.env.API_SERVERS || 'http://localhost:3000').split(',');
 const servers: ServerTarget[] = serverUrls.map(url => ({
@@ -86,36 +84,49 @@ async function healthCheckLoop(): Promise<void> {
 
 // ─── Proxy Server ───
 
-const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
-  const target = getNextServer();
+const proxy = httpProxy.createProxyServer({
+  changeOrigin: true, 
+  secure: true,
+  timeout: 30000,
+  proxyTimeout: 30000,
+});
 
-  if (!target) {
+const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
+  const healthyServers = servers.filter(s => s.healthy);
+
+  if (healthyServers.length === 0) {
     res.writeHead(503, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Service Unavailable', message: 'No healthy backends' }));
-    return;
+    return res.end(JSON.stringify({ 
+      error: 'Service Unavailable', 
+      message: 'No healthy backends. Check API_SERVERS environment variable.',
+      checked: servers.length,
+      config: process.env.API_SERVERS?.substring(0, 20) + '...'
+    }));
   }
+
+  // Strategy: Least Connections (default)
+  const target = healthyServers.reduce((prev, curr) => 
+    (prev.activeConnections < curr.activeConnections) ? prev : curr
+  );
 
   target.activeConnections++;
+  const start = Date.now();
 
-  // Add custom headers
-  if (req.headers) {
-    req.headers['x-forwarded-for'] = req.socket.remoteAddress || '';
-    req.headers['x-load-balancer'] = 'url-shortener-lb';
-  }
-
-  proxy.web(req, res, { target: target.url }, (err: Error) => {
-    target.activeConnections = Math.max(0, target.activeConnections - 1);
-    console.error(`[LB] Proxy error to ${target.url}: ${err.message}`);
-
-    // Mark as unhealthy on error
+  proxy.web(req, res, { 
+    target: target.url,
+    headers: { host: new URL(target.url).host } 
+  }, (err: Error) => {
+    console.error(`[LB] Proxy error to ${target.url}:`, err.message);
+    target.activeConnections--;
     target.healthy = false;
-
-    res.writeHead(502, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Bad Gateway' }));
+    res.writeHead(502);
+    res.end('Bad Gateway');
   });
 
   res.on('finish', () => {
-    target.activeConnections = Math.max(0, target.activeConnections - 1);
+    target.activeConnections--;
+    const duration = Date.now() - start;
+    console.log(`[LB] Routed to ${target.url} | Status: ${res.statusCode} | Duration: ${duration}ms`);
   });
 });
 
