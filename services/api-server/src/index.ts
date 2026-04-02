@@ -31,10 +31,13 @@ fastify.register(fastifyPostgres, {
 });
 
 // Cache
+// fastify.register(fastifyRedis, {
+//   host: process.env.REDIS_HOST || '127.0.0.1',
+//   port: parseInt(process.env.REDIS_PORT || '6379'),
+//   password: process.env.REDIS_PASSWORD,
+// });
 fastify.register(fastifyRedis, {
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
+  url: process.env.REDIS_URL
 });
 
 // Health check (with dependency status)
