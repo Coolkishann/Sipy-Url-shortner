@@ -13,12 +13,19 @@ const HEALTH_CHECK_INTERVAL = 5000; // 5s
 const HEALTH_CHECK_PATH = '/health';
 // Parse servers from environment
 const serverUrls = (process.env.API_SERVERS || 'http://localhost:3000').split(',');
-const servers: ServerTarget[] = serverUrls.map(url => ({
-  url: url.trim(),
-  healthy: true,
-  activeConnections: 0,
-  lastChecked: 0,
-}));
+const servers: ServerTarget[] = serverUrls.map(url => {
+  let finalUrl = url.trim();
+  // If no port is specified and it's an internal Render hostname, default to 3000
+  if (!finalUrl.includes(':', 7)) { // Ignore the : in http://
+    finalUrl = `${finalUrl}:3000`;
+  }
+  return {
+    url: finalUrl,
+    healthy: true,
+    activeConnections: 0,
+    lastChecked: new Date(0).getTime(),
+  };
+});
 
 let currentIndex = 0;
 
