@@ -30,14 +30,13 @@ fastify.register(fastifyPostgres, {
   connectionString: process.env.DATABASE_URL || 'postgres://user:password@localhost:5432/url_shortener',
 });
 
-// Cache
-// fastify.register(fastifyRedis, {
-//   host: process.env.REDIS_HOST || '127.0.0.1',
-//   port: parseInt(process.env.REDIS_PORT || '6379'),
-//   password: process.env.REDIS_PASSWORD,
-// });
+// Cache (Redis)
 fastify.register(fastifyRedis, {
-  url: process.env.REDIS_URL
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  // Required for secure Render Redis connections (rediss://)
+  tls: process.env.REDIS_URL?.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
+  connectTimeout: 10000, // 10s timeout to prevent hanging plugin
+  closeClient: true
 });
 
 // Health check (with dependency status)
@@ -48,16 +47,23 @@ fastify.get('/health', async () => {
   try {
     await fastify.pg.query('SELECT 1');
     dbStatus = 'up';
-  } catch {}
+  } catch (err: any) {
+    fastify.log.error('DB Health Check Failed:', err.message);
+  }
 
   try {
-    await fastify.redis.ping();
-    cacheStatus = 'up';
-  } catch {}
+    // Check if redis client is available before pinging
+    if (fastify.redis) {
+      await fastify.redis.ping();
+      cacheStatus = 'up';
+    }
+  } catch (err: any) {
+    fastify.log.error('Redis Health Check Failed:', err.message);
+  }
 
   return {
     status: dbStatus === 'up' && cacheStatus === 'up' ? 'healthy' : 'degraded',
-    timestamp: new Date().toISOString(),
+    version: '1.0.0',
     services: {
       database: dbStatus,
       cache: cacheStatus,
