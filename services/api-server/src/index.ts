@@ -8,9 +8,12 @@ import fs from 'fs';
 import path from 'path';
 
 const fastify = Fastify({
-  logger: true,
+  logger: {
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+  },
   trustProxy: true,
   disableRequestLogging: process.env.NODE_ENV === 'production',
+  pluginTimeout: 30000, // Increase globally to 30s to prevent boot failures
 });
 
 // CORS — allow frontend
@@ -31,13 +34,22 @@ fastify.register(fastifyPostgres, {
 });
 
 // Cache (Redis)
-fastify.register(fastifyRedis, {
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-  // Required for secure Render Redis connections (rediss://)
-  tls: process.env.REDIS_URL?.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
-  connectTimeout: 10000, // 10s timeout to prevent hanging plugin
-  closeClient: true
-});
+const redisUrl = process.env.REDIS_URL;
+if (redisUrl) {
+  fastify.log.info('Registering Redis with provided URL');
+  fastify.register(fastifyRedis, {
+    url: redisUrl,
+    tls: redisUrl.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
+    connectTimeout: 20000,
+    closeClient: true
+  });
+} else {
+  fastify.log.warn('REDIS_URL not found, using localhost fallback');
+  fastify.register(fastifyRedis, {
+    host: '127.0.0.1',
+    connectTimeout: 10000,
+  });
+}
 
 // Health check (with dependency status)
 fastify.get('/health', async () => {
