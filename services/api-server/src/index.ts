@@ -28,9 +28,12 @@ fastify.addHook('onRequest', rateLimiter({
   windowMs: 60 * 1000,
 }));
 
-// Database
+// Database (Postgres)
+const databaseUrl = process.env.DATABASE_URL;
 fastify.register(fastifyPostgres, {
-  connectionString: process.env.DATABASE_URL || 'postgres://user:password@localhost:5432/url_shortener',
+  connectionString: databaseUrl || 'postgres://user:password@localhost:5432/url_shortener',
+  // Required for Render Postgres External Connections
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 // Cache (Redis)
