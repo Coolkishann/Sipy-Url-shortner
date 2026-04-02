@@ -40,21 +40,18 @@ fastify.register(fastifyPostgres, {
 const redisUrl = process.env.REDIS_URL;
 if (redisUrl) {
   fastify.log.info('Registering Redis connection...');
-  // We wrap this in a way that doesn't crash the entire server boot
-  fastify.register(async (instance) => {
-    try {
-      instance.register(fastifyRedis, {
-        url: redisUrl,
-        tls: redisUrl.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
-        connectTimeout: 10000,
-        closeClient: true
-      });
-    } catch (err: any) {
-      instance.log.error('Redis registration deferred error:', err.message);
-    }
+  fastify.register(fastifyRedis, {
+    url: redisUrl,
+    tls: redisUrl.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
+    connectTimeout: 20000, // 20s inner timeout
+    closeClient: true
   });
 } else {
-  fastify.log.warn('REDIS_URL not found, skipping cache setup');
+  fastify.log.warn('REDIS_URL not found, using localhost fallback');
+  fastify.register(fastifyRedis, {
+    host: '127.0.0.1',
+    connectTimeout: 5000,
+  });
 }
 
 // Health check (with dependency status)
