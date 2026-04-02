@@ -1,0 +1,69 @@
+/* (Original CSS Content copied to new path) */
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #111118;
+  --bg-tertiary: #16161f;
+  --bg-card: #12121b;
+  --bg-card-hover: #1a1a26;
+  --bg-elevated: #1e1e2a;
+  --bg-input: #0e0e16;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-focus: rgba(99, 102, 241, 0.5);
+  --text-primary: #e8e8ed;
+  --text-secondary: #8b8b9e;
+  --text-tertiary: #5c5c72;
+  --accent-blue: #6366f1;
+  --accent-blue-hover: #818cf8;
+  --accent-blue-glow: rgba(99, 102, 241, 0.15);
+  --accent-green: #22c55e;
+  --accent-green-bg: rgba(34, 197, 94, 0.1);
+  --accent-purple: #a855f7;
+  --accent-purple-bg: rgba(168, 85, 247, 0.1);
+  --accent-orange: #f97316;
+  --accent-orange-bg: rgba(249, 115, 22, 0.1);
+  --accent-red: #ef4444;
+  --accent-red-bg: rgba(239, 68, 68, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-md: 0 4px 12px rgba(0,0,0,.5);
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --sidebar-width: 260px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: var(--bg-primary); color: var(--text-primary); display: flex; min-height: 100vh; }
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-width); background: var(--bg-secondary); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; }
+.main-content { margin-left: var(--sidebar-width); flex: 1; padding: 32px 48px; max-width: 1200px; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* KPI Cards */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; display: flex; align-items: center; gap: 16px; }
+.kpi-value { font-size: 1.6rem; font-weight: 700; }
+.kpi-label { font-size: 0.78rem; color: var(--text-secondary); text-transform: uppercase; margin-top: 2px; }
+
+/* Architecture Diagram Styling */
+.architecture-diagram { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 24px 0; }
+.arch-node { background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: 16px 24px; text-align: center; min-width: 180px; position: relative; }
+.arch-row { display: flex; justify-content: center; gap: 32px; }
+.arch-node-status { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
+
+/* Table */
+.card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table th { text-align: left; padding: 8px 16px; color: var(--text-tertiary); font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); }
+.data-table td { padding: 16px; border-bottom: 1px solid var(--border-subtle); }
+
+/* (Include other critical styles for toast, modals, buttons etc. as previously defined) */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 6px; font-weight: 500; border: none; cursor: pointer; }
+.btn-primary { background: var(--accent-blue); color: white; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-default); }
+
+@media (max-width: 768px) {
+  .sidebar { position: relative; width: 100%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  .main-content { margin-left: 0; padding: 16px; }
+}
