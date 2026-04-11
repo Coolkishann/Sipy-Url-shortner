@@ -38,10 +38,9 @@ services:
       context: ./services/api-server
     environment:
       DATABASE_URL: postgres://user:password@postgres:5432/url_shortener
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
       PORT: 3000
-      NODE_ENV: production
+      NODE_ENV: development
       BASE_URL: http://localhost
       RATE_LIMIT: 100
     depends_on:
@@ -56,10 +55,9 @@ services:
       context: ./services/api-server
     environment:
       DATABASE_URL: postgres://user:password@postgres:5432/url_shortener
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
       PORT: 3000
-      NODE_ENV: production
+      NODE_ENV: development
       BASE_URL: http://localhost
       RATE_LIMIT: 100
     depends_on:

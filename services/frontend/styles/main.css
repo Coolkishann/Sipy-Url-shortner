@@ -1,10 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ═══════════════════════════════════════════════
    SNIP — URL Shortener Design System
    ═══════════════════════════════════════════════ */
 
-/* ─── CSS Custom Properties ─── */
 :root {
-  /* Core Palette — Deep dark with vibrant accents */
   --bg-primary: #0a0a0f;
   --bg-secondary: #111118;
   --bg-tertiary: #16161f;
